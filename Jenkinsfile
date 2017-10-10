@@ -69,7 +69,7 @@ node {
   // sh 'env > env.txt'
   // echo readFile('env.txt')
 
-  env.PATH = "${tool 'dli-gradle'}/bin:${tool 'dli-node'}/bin:${env.PATH}"
+  // env.PATH = "${tool 'dli-gradle'}/bin:${tool 'dli-node'}/bin:${env.PATH}"
 
   stage('Checkout') {
     checkout scm
