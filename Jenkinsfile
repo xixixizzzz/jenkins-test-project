@@ -154,7 +154,7 @@ node {
   stage 'build'
   ansiColor('xterm') {
     try {
-      bat 'gradle checkTsFileName release'
+      bat 'gradlew checkTsFileName release'
     } catch (Exception ex) {
       // slackSend channel: '#jenkins', color: 'danger', message: error, teamDomain: slackTeamDomain, tokenCredentialId: 'slack'
       // slackSend channel: '#acn-developer', color: 'danger', message: error, teamDomain: slackTeamDomain, tokenCredentialId: 'slack'
