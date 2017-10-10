@@ -5,7 +5,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "npm run clean && npm run lint && ng build",
+    "clean": "rimraf dist",
     "test": "ng test",
     "lint": "npm run -s lint:html && npm run lint:scss && npm run lint:ts",
     "lint:html": "htmlhint --config .htmlhintrc src/app/**/*.html || true",
@@ -49,6 +50,8 @@
     "ts-node": "~3.0.4",
     "js-yaml": "3.8.3",
     "htmlhint": "0.9.13",
+    "rimraf": "2.6.1",
+    "node-sass": "4.5.3",
     "sass-lint": "1.10.2",
     "sass-loader": "6.0.3",
     "script-loader": "0.7.0",
