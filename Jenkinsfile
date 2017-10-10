@@ -75,6 +75,8 @@ node {
     checkout scm
   }
 
+  echo "222222222222222222222"
+
   def gitlog = ''
   def changeLogs = showChangeLogs()
   if (changeLogs['committer'].length() != 0) {
