@@ -75,21 +75,7 @@ node {
     checkout scm
   }
 
-  echo "222222222222222222222"
-
   def gitlog = ''
-  def changeLogs = showChangeLogs()
-  echo changeLogs
-  if (changeLogs['committer'].length() != 0) {
-    echo "3333333333333"
-    gitlog = changeLogs['committer']
-  } else {
-    echo "44444444444444444"
-    // jenkinsのchangeLogsがゼロの場合があるのでその場合はコマンドで最終コミットを出力する
-    sh 'mkdir -p build/jenkins'
-    sh 'git log --no-color --first-parent -n 1 | grep -v "^Date.*" | grep -v "^commit.*" > build/jenkins/git.log'
-    gitlog = readFile('build/jenkins/git.log')
-  }
 
   def success = """\
         |FINISH: ${ messageName }(${env.BRANCH_NAME}:${env.PROFILE})のビルドが成功しました。:grinning:
