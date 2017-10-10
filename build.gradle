@@ -1,0 +1,184 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath 'org.ajoberstar:gradle-git:1.6.0'
+  }
+}
+
+plugins {
+  id 'org.sonarqube' version '2.2.1'
+  id 'org.hidetake.ssh' version '2.9.0'
+  id "com.moowork.node" version "1.1.1"
+}
+
+import static groovy.io.FileType.FILES
+import groovy.json.JsonBuilder
+import org.ajoberstar.grgit.Grgit
+
+version '0.1-SNAPSHOT'
+
+ext.repo = Grgit.open(project.file('.'))
+
+def getProfile() {
+  def profile = project.properties['PROFILE']
+
+  if (profile == null) {
+    profile = System.getenv()['PROFILE'] == null ? 'local' : System.getenv()['PROFILE']
+  }
+
+  return profile
+}
+
+remotes {
+  dev {
+    if (['local', 'dev', 'nightly', 'dev_next', 'nightly_next', 'sub'].contains(profile)) {
+      host = getProperty("${profile}.ssh.host")
+      user = getProperty("${profile}.ssh.user")
+      identity = file(getProperty("${profile}.ssh.identity"))
+      knownHosts = allowAnyHosts
+    }
+  }
+  http {
+    host = getProperty("http.ssh.host")
+    user = getProperty("http.ssh.user")
+    identity = file(getProperty("http.ssh.identity"))
+    knownHosts = allowAnyHosts
+  }
+}
+
+task jsBuild(dependsOn: yarn_install, type: NpmTask) {
+  args = ['run', 'build', "--env=${profile.toUpperCase()}"];
+}
+
+def mobileZipName = "mobile_${profile}.zip"
+def zipName = "server_${ profile }.zip"
+task release(dependsOn: jsBuild) {
+  doLast {
+    def json = new JsonBuilder()
+    json {
+      status 'SUCCESS'
+      version version
+      profile profile
+      date new Date().format("yyyy/MM/dd HH:mm:ss")
+      commitid repo.head().id
+    }
+
+    ['mobile', 'server'].each {
+      def versionFile = file("dist/$it/version.json")
+      versionFile.parentFile.mkdirs()
+      versionFile.write(json.toString())
+    }
+  }
+}
+
+sonarqube {
+    properties {
+        property "sonar.sources", "src"
+    }
+}
+
+task checkTsFileName {
+  doLast {
+    new File("$projectDir/src/app").traverse(type:FILES, nameFilter:~/.*\.ts/) {
+      if (it.name =~ /[A-Z]/) {
+        throw new RuntimeException("type scriptファイル名に大文字が含まれてます!\n\t${ it.path }")
+      }
+    }
+  }
+}
+
+def wwwMobileHome = "/var/www/html/webview/mobile/${ profile }"
+task mobileDeploy {
+  doLast {
+    ssh.run {
+      settings {
+        pty = true
+      }
+      session(remotes.http) {
+        execute "sudo rm -rf ${ wwwMobileHome }"
+        execute "sudo mkdir -p ${ wwwMobileHome }"
+        ["${ mobileZipName }", "${ mobileZipName }.MD5"].each {
+          put from: "dist/${ it }", into: "./${ it }"
+          execute "sudo mv ${ it } ${ wwwMobileHome }/${ it }"
+        }
+      }
+    }
+  }
+}
+
+task mobileDownload {
+  doLast {
+    ssh.run {
+      settings {
+        pty = true
+      }
+      session(remotes.http) {
+        execute 'mkdir -p oldzip'
+        execute "sudo cp ${ wwwMobileHome }/${ mobileZipName } oldzip"
+        get from: "oldzip/${mobileZipName}", into: "build/${ mobileZipName }"
+      }
+    }
+  }
+}
+
+task unzipOldMobile(dependsOn:mobileDownload, type: Copy) {
+  def zipFile = file("build/${ mobileZipName }")
+  def outputDir = file('build/oldmobile')
+  from zipTree(zipFile)
+  into outputDir
+}
+
+task deploy(dependsOn: mobileDeploy) {
+  doLast {
+    ssh.run {
+      settings {
+        pty = true
+      }
+      session(remotes.dev) {
+        execute "rm -rf ${ zipName }"
+
+        def wwwHome = "/var/www/html/webview/${ profile }"
+        execute "sudo rm -rf ${ wwwHome }"
+        execute "sudo mkdir -p ${ wwwHome }"
+        put from: "dist/${ zipName }", into: "./${ zipName }"
+        execute "sudo unzip -o -d ${ wwwHome } ${ zipName } > /dev/null"
+      }
+    }
+  }
+}
+
+def dirName = getProperty('sysname')
+
+task createReleaseNoteZip(type: Zip) {
+  archiveName "build/distributions/${ dirName }.zip"
+
+  from 'build/release_note'
+  into dirName
+}
+
+task deployReleseNote(dependsOn: createReleaseNoteZip) {
+  doLast {
+    ssh.run {
+      settings {
+        pty = true
+      }
+      session(remotes.http) {
+        execute "rm -rf ${ dirName }.zip"
+
+        def wwwHome = "/var/www/html/releasenote"
+
+        execute "sudo rm -rf ${ wwwHome }/${ dirName }"
+        execute "sudo mkdir -p ${ wwwHome }"
+        put from: "build/distributions/${ dirName }.zip", into: "./${ dirName }.zip"
+
+        execute "sudo unzip -d ${ wwwHome } ${ dirName }.zip > /dev/null"
+      }
+    }
+  }
+}
+
+task wrapper(type: Wrapper) { gradleVersion = '3.1' }
+

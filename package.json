@@ -7,7 +7,11 @@
     "start": "ng serve",
     "build": "ng build",
     "test": "ng test",
-    "lint": "ng lint",
+    "lint": "npm run -s lint:html && npm run lint:scss && npm run lint:ts",
+    "lint:html": "htmlhint --config .htmlhintrc src/app/**/*.html || true",
+    "lint:scss": "sass-lint -c ./.sass-lint.yml -v",
+    "lint:ts": "tslint src/app/**/*.ts --force -t stylish",
+    "report:sonar": "sreporter",
     "e2e": "ng e2e"
   },
   "private": true,
@@ -43,6 +47,11 @@
     "karma-jasmine-html-reporter": "^0.2.2",
     "protractor": "~5.1.2",
     "ts-node": "~3.0.4",
+    "js-yaml": "3.8.3",
+    "htmlhint": "0.9.13",
+    "sass-lint": "1.10.2",
+    "sass-loader": "6.0.3",
+    "script-loader": "0.7.0",
     "tslint": "~5.3.2",
     "typescript": "~2.3.3"
   }
