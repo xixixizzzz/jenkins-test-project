@@ -149,7 +149,7 @@ node {
   """.stripMargin()
 
   stage 'Clean'
-  sh 'git clean -xdf'
+  bat 'git clean -xdf'
 
   stage 'build'
   ansiColor('xterm') {
