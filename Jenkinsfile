@@ -22,7 +22,6 @@ node {
   def slackTeamDomain = 'dikenko'
   def itaRoom = '#sprint3-4-ita'
   def messageName = 'Jenkins Test Project'
-  def releaseNoteLink = '<https://wb026001.acpaws-dev.com/releasenote/webview/|リリースノート>'
   def sharedEnvironment = ['test', 'test_next', 'staging', 'prod', 'pt', 'prom', 'biz']
   def mobileRelease = false
 
