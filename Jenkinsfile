@@ -162,4 +162,8 @@ node {
       throw ex
     }
   }
+
+  stage 'sonarqube'
+  bat 'npm run report:sonar'
+  bat 'gradle sonar'
 }
