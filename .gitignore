@@ -43,3 +43,4 @@ Thumbs.db
 /.git
 /.gradle
 yarn.lock
+/reports
