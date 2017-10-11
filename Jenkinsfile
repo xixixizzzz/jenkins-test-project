@@ -165,5 +165,5 @@ node {
 
   stage 'sonarqube'
   bat 'npm run report:sonar'
-  bat 'gradle sonar'
+  bat 'gradlew sonar'
 }
