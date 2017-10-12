@@ -1,5 +1,6 @@
 @NonCPS
 def showChangeLogs() {
+  echo "${currentBuild.rawBuild}"
   def changeLogSets = currentBuild.rawBuild.changeSets
   def committerBuf = new StringBuilder()
   def filesBuf  = new StringBuilder()
@@ -76,7 +77,6 @@ node {
 
   def gitlog = ''
   echo "showChangeLogs start"
-  echo "${currentBuild.rawBuild}"
   def changeLogs = showChangeLogs()
   echo "showChangeLogs end"
   if (changeLogs['committer'].length() != 0) {
