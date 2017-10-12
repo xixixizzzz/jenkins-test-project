@@ -71,21 +71,22 @@ node {
   env.PATH = "${tool 'dli-gradle'}/bin:${tool 'dli-node'}/bin:${env.PATH}"
 
   stage('Checkout') {
-    checkout scm
+    // checkout scm
+    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/xixixizzzz/jenkins-test-project.git']]])
   }
 
   def gitlog = ''
   echo "showChangeLogs start"
-  def changeLogs = showChangeLogs()
-  echo "showChangeLogs end"
-  if (changeLogs['committer'].length() != 0) {
-    gitlog = changeLogs['committer']
-  } else {
-    // jenkinsのchangeLogsがゼロの場合があるのでその場合はコマンドで最終コミットを出力する
-    bat 'md -p build/jenkins'
-    bat 'git log --no-color --first-parent -n 1 | grep -v "^Date.*" | grep -v "^commit.*" > build/jenkins/git.log'
-    gitlog = readFile('build/jenkins/git.log')
-  }
+  // def changeLogs = showChangeLogs()
+  // echo "showChangeLogs end"
+  // if (changeLogs['committer'].length() != 0) {
+  //   gitlog = changeLogs['committer']
+  // } else {
+  //   // jenkinsのchangeLogsがゼロの場合があるのでその場合はコマンドで最終コミットを出力する
+  //   bat 'md -p build/jenkins'
+  //   bat 'git log --no-color --first-parent -n 1 | grep -v "^Date.*" | grep -v "^commit.*" > build/jenkins/git.log'
+  //   gitlog = readFile('build/jenkins/git.log')
+  // }
 
   def success = """\
         |FINISH: ${ messageName }(${env.BRANCH_NAME}:${env.PROFILE})のビルドが成功しました。:grinning:
