@@ -75,7 +75,9 @@ node {
   }
 
   def gitlog = ''
+  echo "showChangeLogs start"
   def changeLogs = showChangeLogs()
+  echo "showChangeLogs end"
   if (changeLogs['committer'].length() != 0) {
     gitlog = changeLogs['committer']
   } else {
