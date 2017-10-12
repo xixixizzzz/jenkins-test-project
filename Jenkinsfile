@@ -76,6 +76,7 @@ node {
 
   def gitlog = ''
   echo "showChangeLogs start"
+  echo "${currentBuild}"
   def changeLogs = showChangeLogs()
   echo "showChangeLogs end"
   if (changeLogs['committer'].length() != 0) {
