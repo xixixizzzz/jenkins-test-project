@@ -68,15 +68,14 @@ node {
   // sh 'env > env.txt'
   // echo readFile('env.txt')
 
-  // env.PATH = "${tool 'dli-gradle'}/bin:${tool 'dli-node'}/bin:${env.PATH}"
+  env.PATH = "${tool 'dli-gradle'}/bin:${tool 'dli-node'}/bin:${env.PATH}"
 
   stage('Checkout') {
-    // checkout scm
-    checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: 'https://github.com/xixixizzzz/jenkins-test-project.git']]])
+    checkout scm
   }
 
   def gitlog = ''
-  echo "showChangeLogs start"
+  // echo "showChangeLogs start"
   // def changeLogs = showChangeLogs()
   // echo "showChangeLogs end"
   // if (changeLogs['committer'].length() != 0) {
